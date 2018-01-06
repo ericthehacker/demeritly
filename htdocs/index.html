@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Demerit.ly</title>
+
+    <link href="css/styles.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+      <div id="viewApp">
+        <div id="users">
+            <div class="add-user">
+                <select class="add-user-address">
+                    <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">
+                        0x627306090abaB3A6e1400e9345bC60c78a8BEf57
+                    </option>
+                    <option value="0xf17f52151EbEF6C7334FAD080c5704D77216b732">
+                        0xf17f52151EbEF6C7334FAD080c5704D77216b732
+                    </option>
+                    <option value="0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef">
+                            0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef
+                    </option>
+                    <option value="0x821aEa9a577a9b44299B9c15c88cf3087F3b5544">
+                            0x821aEa9a577a9b44299B9c15c88cf3087F3b5544
+                    </option>
+                    <option value="0x0d1d4e623D10F9FBA5Db95830F7d3839406C6AF2">
+                            0x0d1d4e623D10F9FBA5Db95830F7d3839406C6AF2
+                    </option>
+                    <option value="0x2932b7A2355D6fecc4b5c0B6BD44cC31df247a2e">
+                            0x2932b7A2355D6fecc4b5c0B6BD44cC31df247a2e
+                    </option>
+                    <option value="0x2191eF87E392377ec08E7c08Eb105Ef5448eCED5">
+                            0x2191eF87E392377ec08E7c08Eb105Ef5448eCED5
+                    </option>
+                    <option value="0x0F4F2Ac550A1b4e2280d04c21cEa7EBD822934b5">
+                            0x0F4F2Ac550A1b4e2280d04c21cEa7EBD822934b5
+                    </option>
+                </select>
+                <input type="text" class="add-user-name" placeholder="Name" />
+                <input type="email" class="add-user-email" placeholder="Email" />
+                <button id="add-user-button">Add User</button>
+            </div>
+
+            <div class="user-list">
+                <div class="user" v-for="user in users">
+                    <h2>{{ user.name }}</h2>
+
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/web3.min.js"></script>
+    <script src="js/truffle-contract.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
