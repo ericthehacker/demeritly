@@ -1,12 +1,13 @@
 var Demeritly = artifacts.require('Demeritly');
 
 contract('Demeritly', function(accounts){
-    it("Should add user", function() {
+    it("Should add users", function() {
         return Demeritly.deployed().then(function(instance) {
 
             return instance.addUser(
                 accounts[0],
                 'eric',
+                'eric@ericisawesom.me',
                 {
                     from: accounts[0]
                 }
@@ -14,6 +15,7 @@ contract('Demeritly', function(accounts){
                 return instance.addUser(
                     accounts[1],
                     'wiese',
+                    'wiese@ericisawesom.me',
                     {
                         from: accounts[1]
                     }
@@ -23,11 +25,19 @@ contract('Demeritly', function(accounts){
             }).then(function(user) {
                 assert.equal(user[0], accounts[0]);
                 assert.equal(user[1], 'eric');
+                assert.equal(user[2], 'eric@ericisawesom.me');
             }).then(function() {
                 return instance.users(accounts[1]);
             }).then(function(user) {
                 assert.equal(user[0], accounts[1]);
                 assert.equal(user[1], 'wiese');
+                assert.equal(user[2], 'wiese@ericisawesom.me');
+
+                return instance.getUserAddressLength();
+            }).then(function(length) {
+                assert.equal(length, 2);
+
+                return instance.get
             });
 
         });
@@ -49,6 +59,10 @@ contract('Demeritly', function(accounts){
                 assert.equal(demerit[0], accounts[0]);
                 assert.equal(demerit[1], 5);
                 assert.equal(demerit[2], 'eric is great');
+
+                return instance.getDemeritCount(accounts[1]);
+            }).then(function(count) {
+                assert.equal(count, 1);
             });
 
         });
