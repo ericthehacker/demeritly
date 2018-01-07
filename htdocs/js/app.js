@@ -144,9 +144,43 @@ App = {
 
 		that.viewApp = new Vue({
 			el: '#viewApp',
+			components: {
+				'demerits': {
+					//el: '#demerits-template', //@todo: move template out of JS
+					template: `
+						<div class="demerits">
+							<p class="demerit" v-for="demerit in demerits">
+								<span class="field">
+									<strong>Date:</strong> {{ demerit.formattedDate }}
+								</span>
+								<span class="field">
+									<strong>From:</strong> 
+									<a v-bind:href="'#' + demerit.sender.address" class="tab-target">
+										{{ demerit.sender.name }}
+									</a>
+								</span>
+								<span class="field">
+									<strong>To:</strong>
+									<a v-bind:href="'#' + demerit.receiver.address" class="tab-target">
+										{{ demerit.receiver.name }}
+									</a>
+								</span>
+								<span class="field">
+									<strong>Amount:</strong> -{{ demerit.amount }}
+								</span>
+								<span class="field">
+									<strong>Message:</strong> {{ demerit.message }}
+								</span>
+							</p>
+						</div>`,
+					props: [
+						'demerits'
+					]
+				}
+			},
 			data: {
 				userIndexByAddress: {},
-				demeritIndexByHash: {},
+				knownDemeritHashes: [],
 				users: [],
 				demerits: [],
 				demeritsBySenderAddress: {},
@@ -282,9 +316,10 @@ App = {
 
 		that.viewApp.userIndexByAddress[address] = that.viewApp.users.length - 1;
 		
-		that.viewApp.users.sort(function(a,b) {
-			return a.name.localeCompare(b.name);
-		});
+		//@todo: disable sort until index mapping fixed
+		// that.viewApp.users.sort(function(a,b) {
+		// 	return a.name.localeCompare(b.name);
+		// });
 	},
 
 	addDemerit: function(sender, receiver, amount, message, timestamp) {
@@ -301,7 +336,7 @@ App = {
 		].join('-');
 
 		if(
-			that.viewApp.demeritIndexByHash[hash] !== undefined
+			that.viewApp.knownDemeritHashes.indexOf(hash) !== -1
 			|| that.viewApp.userIndexByAddress[sender] === undefined
 			|| that.viewApp.userIndexByAddress[receiver] === undefined
 		) {
@@ -328,7 +363,7 @@ App = {
 		});
 
 		// populate convenience mappings
-		that.viewApp.demeritIndexByHash[hash] = demeritIndex;
+		that.viewApp.knownDemeritHashes.push(hash);
 		if(that.viewApp.demeritsBySenderAddress[sender] === undefined) that.viewApp.demeritsBySenderAddress[sender] = [];
 		that.viewApp.demeritsBySenderAddress[sender].push(demeritIndex);
 		if(that.viewApp.demeritsByReceiverAddress[receiver] === undefined) that.viewApp.demeritsByReceiverAddress[receiver] = [];
