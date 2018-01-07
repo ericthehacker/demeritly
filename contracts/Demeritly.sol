@@ -9,8 +9,10 @@ contract Demeritly {
 
     struct Demerit {
         address sender;
+        address receiver;
         uint8 amount;
         string message;
+        uint timestamp;
     }
 
     address[] public userAddresses;
@@ -40,7 +42,7 @@ contract Demeritly {
         return userAddresses.length;
     }
 
-    event AddDemerit(address sender, address receiver, uint8 amount, string message);
+    event AddDemerit(address sender, address receiver, uint8 amount, string message, uint timestamp);
 
     function addDemerit(address receiver, uint8 amount, string message) public {
         // ensure both sender and receiver are users
@@ -53,17 +55,19 @@ contract Demeritly {
         Demerit memory demerit = Demerit(
             {
                 sender: msg.sender,
+                receiver: receiver,
                 amount: amount,
-                message: message
+                message: message,
+                timestamp: now
             }
         );
 
         demerits[receiver].push(demerit);
 
-        AddDemerit(msg.sender, receiver, amount, message);
+        AddDemerit(msg.sender, receiver, amount, message, now);
     }
 
-    function getDemeritCount(address userAddress) view public returns (uint) {
-        return demerits[userAddress].length;
+    function getDemeritCount(address userAddress) view public returns (address, uint) {
+        return (userAddress, demerits[userAddress].length);
     }
 }

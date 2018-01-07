@@ -1,0 +1,15 @@
+[v-cloak] {
+    display: none;
+}
+
+.tab {
+    display: none;
+}
+
+.tab.visible {
+    display: block;
+}
+
+.demerits .field {
+    display: block;
+}

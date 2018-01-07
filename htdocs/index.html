@@ -18,33 +18,39 @@
     <![endif]-->
   </head>
   <body>
-      <div id="viewApp">
-        <div id="users">
+      <div id="viewApp" v-cloak>
+        <div class="tabs">
+            <a href="#users">Users</a>
+            <a href="#demerits">Demerits</a>
+        </div>
+        <div id="users" class="tab visible">
             <div class="add-user">
+                <h2>Add User</h2>
+
                 <select class="add-user-address">
                     <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">
-                        0x627306090abaB3A6e1400e9345bC60c78a8BEf57
+                        Address 1
                     </option>
                     <option value="0xf17f52151EbEF6C7334FAD080c5704D77216b732">
-                        0xf17f52151EbEF6C7334FAD080c5704D77216b732
+                            Address 2
                     </option>
                     <option value="0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef">
-                            0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef
+                            Address 3
                     </option>
                     <option value="0x821aEa9a577a9b44299B9c15c88cf3087F3b5544">
-                            0x821aEa9a577a9b44299B9c15c88cf3087F3b5544
+                            Address 4
                     </option>
                     <option value="0x0d1d4e623D10F9FBA5Db95830F7d3839406C6AF2">
-                            0x0d1d4e623D10F9FBA5Db95830F7d3839406C6AF2
+                            Address 5
                     </option>
                     <option value="0x2932b7A2355D6fecc4b5c0B6BD44cC31df247a2e">
-                            0x2932b7A2355D6fecc4b5c0B6BD44cC31df247a2e
+                            Address 6
                     </option>
                     <option value="0x2191eF87E392377ec08E7c08Eb105Ef5448eCED5">
-                            0x2191eF87E392377ec08E7c08Eb105Ef5448eCED5
+                            Address 7
                     </option>
                     <option value="0x0F4F2Ac550A1b4e2280d04c21cEa7EBD822934b5">
-                            0x0F4F2Ac550A1b4e2280d04c21cEa7EBD822934b5
+                            Address 8
                     </option>
                 </select>
                 <input type="text" class="add-user-name" placeholder="Name" />
@@ -53,11 +59,60 @@
             </div>
 
             <div class="user-list">
+                <h2>Users</h2>
+
                 <div class="user" v-for="user in users">
                     <h2>{{ user.name }}</h2>
-
+                    
+                    <img v-bind:src="user.avatar" class="avatar" />
                     
                 </div>
+            </div>
+        </div>
+
+        <div id="demerits" class="tab">
+            <div class="add-demerit">
+                <h2>Add Demerit</h2>
+
+                <label for="demerit-reciever">
+                    Receiver
+                </label>
+                <select id="demerit-receiver">
+                    <option value="" selected="selected">-- Select User --</option>
+                    <option v-for="user in users" v-bind:value="user.address">
+                        {{ user.name }}
+                    </option>
+                </select>
+
+                <label for="demerit-amount">Amount</label>
+                <input type="number" id="demerit-amount" />
+
+                <label for="demerit-message">Message</label>
+                <textarea id="demerit-message"></textarea>
+
+                <button id="demerit-submit">Give</button>
+            </div>
+
+            <div class="demerits">
+                <h2>Demerits</h2>
+
+                <p class="demerit" v-for="demerit in demerits">
+                    <span class="field">
+                        <strong>Date:</strong> {{ demerit.formattedDate }}
+                    </span>
+                    <span class="field">
+                        <strong>From:</strong> {{ demerit.sender }}
+                    </span>
+                    <span class="field">
+                        <strong>To:</strong> {{ demerit.receiver }}
+                    </span>
+                    <span class="field">
+                        <strong>Amount:</strong> -{{ demerit.amount }}
+                    </span>
+                    <span class="field">
+                        <strong>Message:</strong> {{ demerit.message }}
+                    </span>
+                </p>
             </div>
         </div>
     </div>
@@ -66,6 +121,7 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/web3.min.js"></script>
     <script src="js/truffle-contract.js"></script>
+    <script src="js/spark-md5.min.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>
