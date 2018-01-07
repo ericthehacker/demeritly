@@ -20,6 +20,14 @@
   <body>
       <div id="viewApp" v-cloak>
         <div class="tabs">
+            <div class="account-switcher-wrapper">
+                <label for="account-switcher">Ethereum Account</label>
+                <select id="account-switcher">
+                    <option v-bind:value="account" v-for="(account, key) in accounts">
+                        {{ key + 1 }}: {{ account }}
+                    </option>
+                </select>
+            </div>
             <a class="tab-target" href="#users">Users</a>
             <a class="tab-target" href="#demerits">Demerits</a>
         </div>
@@ -27,32 +35,7 @@
             <div class="add-user">
                 <h2>Add User</h2>
 
-                <select class="add-user-address">
-                    <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">
-                        Address 1
-                    </option>
-                    <option value="0xf17f52151EbEF6C7334FAD080c5704D77216b732">
-                            Address 2
-                    </option>
-                    <option value="0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef">
-                            Address 3
-                    </option>
-                    <option value="0x821aEa9a577a9b44299B9c15c88cf3087F3b5544">
-                            Address 4
-                    </option>
-                    <option value="0x0d1d4e623D10F9FBA5Db95830F7d3839406C6AF2">
-                            Address 5
-                    </option>
-                    <option value="0x2932b7A2355D6fecc4b5c0B6BD44cC31df247a2e">
-                            Address 6
-                    </option>
-                    <option value="0x2191eF87E392377ec08E7c08Eb105Ef5448eCED5">
-                            Address 7
-                    </option>
-                    <option value="0x0F4F2Ac550A1b4e2280d04c21cEa7EBD822934b5">
-                            Address 8
-                    </option>
-                </select>
+                <input type=text" class="add-user-address" placeholder="Address" />
                 <input type="text" class="add-user-name" placeholder="Name" />
                 <input type="email" class="add-user-email" placeholder="Email" />
                 <button id="add-user-button">Add User</button>
@@ -101,6 +84,14 @@
 
         <div v-for="user in users" v-bind:id="user.address" class="tab user-detail">
             <h1>{{ user.name }}</h1>
+
+            <img v-bind:src="user.avatar" class="avatar" />
+
+            <p>
+                <span class="field">
+                    <strong>Address: </strong> {{ user.address }}
+                </span>
+            </p>
 
             <div class="demerits">
                 <h2>Received Demerits</h2>

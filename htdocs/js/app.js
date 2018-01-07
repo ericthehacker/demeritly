@@ -1,6 +1,7 @@
 App = {
+	web3Provider: null,
 	contracts: {},
-	account: null,
+	accounts: [],
 	demeritly: null,
 	viewApp: null,
 
@@ -24,9 +25,9 @@ App = {
 		web3.eth.getAccounts(function(error, accounts) {
 			if (error) {
 				console.log(error);
+			} else {
+				that.accounts = accounts;
 			}
-		
-			that.account = accounts[0];
 		});
 	},
 
@@ -57,16 +58,25 @@ App = {
 	callMethod(methodName, args, value) {
 		var that = this;
 
+		let account = $('#account-switcher').val();
+		if(!account) {
+			throw 'No account selected';
+		}
+
 		if(!args) {
 			args = [];
 		}
 
-		return that.demeritly[methodName].estimateGas.apply(this, args).then(function(gas){
+		// make temp copy with from: for estimation purposes
+		var estimationArgs = args.slice();
+		estimationArgs.push({from: account});
+
+		return that.demeritly[methodName].estimateGas.apply(this, estimationArgs).then(function(gas){
 			gas = parseInt(Number(gas) * 1); //gas estimate seems to be a little low.
 
 			// add options
 			var options = {
-				from: that.account,
+				from: account,
 				gas: gas
 			};
 			if(value) {
@@ -185,7 +195,7 @@ App = {
 				demerits: [],
 				demeritsBySenderAddress: {},
 				demeritsByReceiverAddress: {},
-				userDetail: null
+				accounts: that.accounts
 			},
 			methods: {
 				userSentDemerits: (address) => {
@@ -224,6 +234,8 @@ App = {
 
 		var usersAddresses = [];
 		that.callMethod('getUserAddressLength').then(length => {
+			length = length.toNumber();
+
 			for(var i=0; i<length; i++) {
 				usersAddresses.push(that.callMethod(
 					'userAddresses',
