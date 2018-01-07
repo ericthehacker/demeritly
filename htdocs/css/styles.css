@@ -10,6 +10,10 @@
     display: block;
 }
 
-.demerits .field {
+.field {
+    display: block;
+}
+
+.user {
     display: block;
 }

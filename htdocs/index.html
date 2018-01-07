@@ -20,8 +20,8 @@
   <body>
       <div id="viewApp" v-cloak>
         <div class="tabs">
-            <a href="#users">Users</a>
-            <a href="#demerits">Demerits</a>
+            <a class="tab-target" href="#users">Users</a>
+            <a class="tab-target" href="#demerits">Demerits</a>
         </div>
         <div id="users" class="tab visible">
             <div class="add-user">
@@ -61,12 +61,12 @@
             <div class="user-list">
                 <h2>Users</h2>
 
-                <div class="user" v-for="user in users">
+                <a class="user tab-target" v-for="user in users" v-bind:href="'#' + user.address">
                     <h2>{{ user.name }}</h2>
                     
                     <img v-bind:src="user.avatar" class="avatar" />
                     
-                </div>
+                </a>
             </div>
         </div>
 
@@ -93,6 +93,7 @@
                 <button id="demerit-submit">Give</button>
             </div>
 
+            <!-- @todo: move to component -->
             <div class="demerits">
                 <h2>Demerits</h2>
 
@@ -101,10 +102,76 @@
                         <strong>Date:</strong> {{ demerit.formattedDate }}
                     </span>
                     <span class="field">
-                        <strong>From:</strong> {{ demerit.sender }}
+                        <strong>From:</strong> 
+                        <a v-bind:href="'#' + demerit.sender.address">
+                            {{ demerit.sender.name }}
+                        </a>
                     </span>
                     <span class="field">
-                        <strong>To:</strong> {{ demerit.receiver }}
+                        <strong>To:</strong>
+                        <a v-bind:href="'#' + demerit.receiver.address">
+                            {{ demerit.receiver.name }}
+                        </a>
+                    </span>
+                    <span class="field">
+                        <strong>Amount:</strong> -{{ demerit.amount }}
+                    </span>
+                    <span class="field">
+                        <strong>Message:</strong> {{ demerit.message }}
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <div v-for="user in users" v-bind:id="user.address" class="tab user-detail">
+            <h1>{{ user.name }}</h1>
+
+            <!-- @todo: move to component -->
+            <div class="demerits">
+                <h2>Received Demerits</h2>
+                <p class="demerit" v-for="demerit in userReceivedDemerits(user.address)">
+                    <span class="field">
+                        <strong>Date:</strong> {{ demerit.formattedDate }}
+                    </span>
+                    <span class="field">
+                        <strong>From:</strong> 
+                        <a v-bind:href="'#' + demerit.sender.address">
+                            {{ demerit.sender.name }}
+                        </a>
+                    </span>
+                    <span class="field">
+                        <strong>To:</strong>
+                        <a v-bind:href="'#' + demerit.receiver.address">
+                            {{ demerit.receiver.name }}
+                        </a>
+                    </span>
+                    <span class="field">
+                        <strong>Amount:</strong> -{{ demerit.amount }}
+                    </span>
+                    <span class="field">
+                        <strong>Message:</strong> {{ demerit.message }}
+                    </span>
+                </p>
+            </div>
+
+            <!-- @todo: move to component -->
+            <div class="demerits">
+                <h2>Sent Demerits</h2>
+                <p class="demerit" v-for="demerit in userSentDemerits(user.address)">
+                    <span class="field">
+                        <strong>Date:</strong> {{ demerit.formattedDate }}
+                    </span>
+                    <span class="field">
+                        <strong>From:</strong> 
+                        <a v-bind:href="'#' + demerit.sender.address">
+                            {{ demerit.sender.name }}
+                        </a>
+                    </span>
+                    <span class="field">
+                        <strong>To:</strong>
+                        <a v-bind:href="'#' + demerit.receiver.address">
+                            {{ demerit.receiver.name }}
+                        </a>
                     </span>
                     <span class="field">
                         <strong>Amount:</strong> -{{ demerit.amount }}

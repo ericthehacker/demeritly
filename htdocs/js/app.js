@@ -85,7 +85,7 @@ App = {
 	bindEvents: function() {
 		var that = this;
 
-		$('.tabs a').click(function(e) {
+		$(document).on('click', '.tab-target', function(e) {
 			e.preventDefault();
 			var link = $(this);
 
@@ -148,7 +148,36 @@ App = {
 				userIndexByAddress: {},
 				demeritIndexByHash: {},
 				users: [],
-				demerits: []
+				demerits: [],
+				demeritsBySenderAddress: {},
+				demeritsByReceiverAddress: {},
+				userDetail: null
+			},
+			methods: {
+				userSentDemerits: (address) => {
+					if(that.viewApp.demeritsBySenderAddress[address] === undefined) {
+						return [];
+					}
+
+					let demerits = [];
+					that.viewApp.demeritsBySenderAddress[address].forEach(index =>
+						demerits.push(that.viewApp.demerits[index])
+					);
+					
+					return demerits;
+				},
+				userReceivedDemerits: (address) => {
+					if(that.viewApp.demeritsByReceiverAddress[address] === undefined) {
+						return [];
+					}
+
+					let demerits = [];
+					that.viewApp.demeritsByReceiverAddress[address].forEach(index =>
+						demerits.push(that.viewApp.demerits[index])
+					);
+					
+					return demerits;
+				}
 			}
 		});
 
@@ -271,23 +300,39 @@ App = {
 			timestamp
 		].join('-');
 
-		if(that.viewApp.demeritIndexByHash[hash] !== undefined) {
+		if(
+			that.viewApp.demeritIndexByHash[hash] !== undefined
+			|| that.viewApp.userIndexByAddress[sender] === undefined
+			|| that.viewApp.userIndexByAddress[receiver] === undefined
+		) {
+			// must be event firing too early -- bail
 			return;
 		}
 
+		var senderUser = that.viewApp.users[that.viewApp.userIndexByAddress[sender]];
+		var receiverUser = that.viewApp.users[that.viewApp.userIndexByAddress[receiver]];
+
 		that.viewApp.demerits.push({
-			sender: sender,
-			receiver: receiver,
+			sender: senderUser,
+			receiver: receiverUser,
 			amount: amount.toNumber(),
 			message: message,
 			timestamp: timestamp,
 			formattedDate: date.toLocaleDateString(locale) + ' ' + date.toLocaleTimeString(locale)
 		});
-		that.viewApp.demeritIndexByHash[hash] = that.viewApp.demerits.length - 1;
+
+		let demeritIndex = that.viewApp.demerits.length - 1;
 
 		that.viewApp.demerits.sort(function(a,b){
 			return -1 * (a.timestamp - b.timestamp);
 		});
+
+		// populate convenience mappings
+		that.viewApp.demeritIndexByHash[hash] = demeritIndex;
+		if(that.viewApp.demeritsBySenderAddress[sender] === undefined) that.viewApp.demeritsBySenderAddress[sender] = [];
+		that.viewApp.demeritsBySenderAddress[sender].push(demeritIndex);
+		if(that.viewApp.demeritsByReceiverAddress[receiver] === undefined) that.viewApp.demeritsByReceiverAddress[receiver] = [];
+		that.viewApp.demeritsByReceiverAddress[receiver].push(demeritIndex);
 	}
 };
 
