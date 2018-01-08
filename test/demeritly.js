@@ -57,12 +57,14 @@ contract('Demeritly', function(accounts){
                 return instance.demerits(accounts[1], 0);
             }).then(function(demerit) {
                 assert.equal(demerit[0], accounts[0]);
-                assert.equal(demerit[1], 5);
-                assert.equal(demerit[2], 'eric is great');
+                assert.equal(demerit[1], accounts[1]);
+                assert.equal(demerit[2], 5);
+                assert.equal(demerit[3], 'eric is great');
 
                 return instance.getDemeritCount(accounts[1]);
             }).then(function(count) {
-                assert.equal(count, 1);
+                assert.equal(count[0], accounts[1]);
+                assert.equal(count[1], 1);
             });
 
         });
