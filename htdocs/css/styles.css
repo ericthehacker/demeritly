@@ -2,6 +2,20 @@
     display: none;
 }
 
+#account-switcher-app {
+    border-bottom: solid 2px black;
+    margin-bottom: 5px;
+    padding: 5px;
+}
+
+#register {
+    display: none;
+}
+
+#register.visible {
+    display: block;
+}
+
 .tab {
     display: none;
 }

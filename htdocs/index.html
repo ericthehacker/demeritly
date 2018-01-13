@@ -18,16 +18,43 @@
     <![endif]-->
   </head>
   <body>
-      <div id="viewApp" v-cloak>
-        <div class="tabs">
-            <div class="account-switcher-wrapper">
-                <label for="account-switcher">Ethereum Account</label>
-                <select id="account-switcher">
-                    <option v-bind:value="account" v-for="(account, key) in accounts">
-                        {{ key + 1 }}: {{ account }}
-                    </option>
-                </select>
+    <div id="account-switcher-app" class="account-switcher-wrapper" v-cloak>
+        <label for="account-switcher">Ethereum Account</label>
+        <select id="account-switcher">
+            <option v-bind:value="account" v-for="(account, key) in accounts" v-bind:selected="account == selectedAccount ? 'selected' : ''">
+                {{ key + 1 }}: {{ account }}
+            </option>
+        </select>
+        <button id="account-switcher-button">Select Account</button>
+      </div>
+
+      <div id="register">
+        <h1>Register for Demerit.ly</h1>
+
+        <p>
+            You totally have to register, dude.
+        </p>
+
+        <p>
+            <input type="test" id="register-name" placeholder="John Smith" />
+            <input type="email" id="register-email" placeholder="my@email.address" />
+            <button id="register-button">Register My Current Address</button>
+        </p>
+      </div>
+
+      <div id="demeritly-app" v-cloak>
+        <div class="header">
+            <div class="demerit-balance">
+                <div class="balance">
+                    Demerit Balance: {{ demeritBalance }}
+                </div>
+                <div class="add">
+                    <input type="number" id="add-balance-amount" />
+                    <button id="add-balance-button">Buy Demerits</button>
+                </div>
             </div>
+        </div>
+        <div class="tabs">
             <a class="tab-target" href="#users">Users</a>
             <a class="tab-target" href="#demerits">Demerits</a>
         </div>

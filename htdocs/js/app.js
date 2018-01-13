@@ -1,9 +1,12 @@
 App = {
+	EMPTY_ADDRESS: '0x0000000000000000000000000000000000000000',
+
 	web3Provider: null,
 	contracts: {},
 	accounts: [],
 	demeritly: null,
 	viewApp: null,
+	accountsUiApp: null,
 
 	init: function() {
 		this.initWeb3();
@@ -55,28 +58,33 @@ App = {
 		});
 	},
 
+	getAccount: function() {
+		return window.location.hash.substr(1);
+	},
+
 	callMethod(methodName, args, value) {
 		var that = this;
-
-		let account = $('#account-switcher').val();
-		if(!account) {
-			throw 'No account selected';
-		}
 
 		if(!args) {
 			args = [];
 		}
 
-		// make temp copy with from: for estimation purposes
+		// make temp args copy for estimation purposes
 		var estimationArgs = args.slice();
-		estimationArgs.push({from: account});
+		let estimationOptions = {
+			from: that.getAccount()
+		};
+		if(value) {
+			estimationOptions.value = value;
+		}
+		estimationArgs.push(estimationOptions);
 
 		return that.demeritly[methodName].estimateGas.apply(this, estimationArgs).then(function(gas){
 			gas = parseInt(Number(gas) * 1); //gas estimate seems to be a little low.
 
 			// add options
 			var options = {
-				from: account,
+				from: that.getAccount(),
 				gas: gas
 			};
 			if(value) {
@@ -95,6 +103,19 @@ App = {
 	bindEvents: function() {
 		var that = this;
 
+		$('#register-button').click(e => {
+			that.callMethod(
+				'addUser',
+				[
+					that.getAccount(),
+					$('#register-name').val(),
+					$('#register-email').val(),
+				]
+			).then(() => {
+				window.location.reload();
+			});
+		});
+
 		$(document).on('click', '.tab-target', function(e) {
 			e.preventDefault();
 			var link = $(this);
@@ -103,7 +124,7 @@ App = {
 
 			$(link.attr('href')).addClass('visible');
 		});
-
+		
 		$('#add-user-button').click(function() {
 			that.callMethod(
 				'addUser',
@@ -115,7 +136,7 @@ App = {
 			);
 		});
 
-		$('#demerit-submit').click(function() {
+		$(document).on('click', '#demerit-submit', function() {
 			that.callMethod(
 				'addDemerit',
 				[
@@ -126,34 +147,110 @@ App = {
 			);
 		});
 
-		that.demeritly.AddUser().watch(function(error, result) {
-			if(!error) {
-				that.addUser(
-					result.args.userAddress,
-					result.args.name,
-					result.args.email
+		$(document).on('click', '#add-balance-button', e => {
+			var amount = $('#add-balance-amount').val();
+
+			that.callMethod(
+				'getDemeritPrice',
+				[amount]
+			).then(price => {
+				return that.callMethod(
+					'buyDemerits',
+					[amount],
+					price.toNumber()
 				);
-			}
+			});
 		});
 
-		that.demeritly.AddDemerit().watch(function(error, result) {
-			if(!error) {
-				that.addDemerit(
-					result.args.sender,
-					result.args.receiver,
-					result.args.amount,
-					result.args.message,
-					result.args.timestamp
-				)
-			}
+		window.addEventListener('viewAppLoaded', e => {
+			that.demeritly.DemeritBalanceChange().watch(function(error, result) {
+				if(!error) {
+					that.demeritBalanceChange(
+						result.args.addr,
+						result.args.newBalance
+					);
+				}
+			});
+		});
+
+		window.addEventListener('viewAppLoaded', e => {
+			that.demeritly.AddUser().watch(function(error, result) {
+				if(!error) {
+					that.addUser(
+						result.args.userAddress,
+						result.args.name,
+						result.args.email
+					);
+				}
+			});
+		});
+
+		window.addEventListener('viewAppLoaded', e => {
+			that.demeritly.AddDemerit().watch(function(error, result) {
+				if(!error) {
+					that.addDemerit(
+						result.args.sender,
+						result.args.receiver,
+						result.args.amount,
+						result.args.message,
+						result.args.timestamp
+					)
+				}
+			});
 		});
 	},
 
 	initUi: function() {
 		var that = this;
 
+		this.initAccountsUi();
+
+		if(that.getAccount().length == 0) {
+			return; // no account selected yet
+		}
+
+		// user has selected account -- proceed.
+
+		that.callMethod(
+			'users',
+			[
+				that.getAccount()
+			]
+		).then(user => {
+			if(user[0] == that.EMPTY_ADDRESS) {
+				// user's address not in user list -- display register UI
+				$('#register').addClass('visible');
+			} else {
+				// user's address is in user list -- display main UI
+				that.initDemeritlyUiApp();
+				that.initUsersUi();
+				that.initDemeritsUi();
+			}
+		});
+	},
+
+	initAccountsUi: function() {
+		let that = this;
+
+		that.accountsUiApp = new Vue({
+			el: '#account-switcher-app',
+			data: {
+				accounts: that.accounts,
+				selectedAccount: that.getAccount()
+			}
+		});
+
+		$('#account-switcher-button').click(e => {
+			window.location.hash = $('#account-switcher').val();
+			window.location.reload(); //hacky but it makes state management easier
+		});
+	},
+
+	initDemeritlyUiApp: function() {
+		var that = this;
+
 		that.viewApp = new Vue({
-			el: '#viewApp',
+			el: '#demeritly-app',
 			components: {
 				'demerits': {
 					//el: '#demerits-template', //@todo: move template out of JS
@@ -195,7 +292,8 @@ App = {
 				demerits: [],
 				demeritsBySenderAddress: {},
 				demeritsByReceiverAddress: {},
-				accounts: that.accounts
+				accounts: that.accounts,
+				demeritBalance: 0
 			},
 			methods: {
 				userSentDemerits: (address) => {
@@ -225,8 +323,16 @@ App = {
 			}
 		});
 
-		this.initUsersUi();
-		this.initDemeritsUi();
+		window.dispatchEvent(new Event('viewAppLoaded'));
+	},
+
+	_getUserObject: function(rawUserData) {
+		return {
+			address: rawUserData[0],
+			name: rawUserData[1],
+			email: rawUserData[2],
+			demeritBalance: rawUserData[3].toNumber()
+		}
 	},
 
 	initUsersUi: function() {
@@ -254,16 +360,27 @@ App = {
 
 			return Promise.all(users);
 		}).then(users => {
-			users.forEach(user => 
+			users.forEach(rawUserData => {
+				let user = that._getUserObject(rawUserData);
+
 				that.addUser(
-					user[0],
-					user[1],
-					user[2]
-				)
-			);
+					user.address,
+					user.name,
+					user.email,
+					user.demeritBalance
+				);
+
+				if(user.address == that.getAccount()) {
+					that.initCurrentUserUi(user);
+				}
+			});
 
 			window.dispatchEvent(new Event('usersLoaded'));
 		});
+	},
+
+	initCurrentUserUi: function(user) {
+		this.viewApp.demeritBalance = user.demeritBalance;
 	},
 
 	initDemeritsUi: function() {
@@ -380,11 +497,20 @@ App = {
 		that.viewApp.demeritsBySenderAddress[sender].push(demeritIndex);
 		if(that.viewApp.demeritsByReceiverAddress[receiver] === undefined) that.viewApp.demeritsByReceiverAddress[receiver] = [];
 		that.viewApp.demeritsByReceiverAddress[receiver].push(demeritIndex);
+	},
+
+	demeritBalanceChange: function(address, newBalance) {
+		var that = this;
+
+		if(address != that.getAccount()) {
+			// only interested in current account
+			return;
+		}
+
+		that.viewApp.demeritBalance = newBalance.toNumber();
 	}
 };
 
-$(function() {
-  $(document).ready(function() {
-    App.init();
-  });
+$(document).ready(function() {
+	App.init();
 });

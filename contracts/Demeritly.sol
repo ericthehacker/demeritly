@@ -5,6 +5,7 @@ contract Demeritly {
         address addr;
         string name;
         string email;
+        uint demeritBalance;
     }
 
     struct Demerit {
@@ -28,7 +29,8 @@ contract Demeritly {
             {
                 addr: userAddress,
                 name: name,
-                email: email
+                email: email,
+                demeritBalance: 0
             }
         );
 
@@ -52,6 +54,9 @@ contract Demeritly {
         // ensure sender and receiver are different users
         require(msg.sender != receiver);
 
+        // ensure sender has demerits to send
+        require(users[msg.sender].demeritBalance >= amount);
+
         Demerit memory demerit = Demerit(
             {
                 sender: msg.sender,
@@ -64,10 +69,44 @@ contract Demeritly {
 
         demerits[receiver].push(demerit);
 
+        users[msg.sender].demeritBalance -= amount;
+
+        DemeritBalanceChange(msg.sender, users[msg.sender].demeritBalance);
+
+        // send value of demerit
+        receiver.transfer(
+            _getDemeritPayoutValue(
+                getDemeritPrice(amount)
+            )
+        );
+
         AddDemerit(msg.sender, receiver, amount, message, now);
     }
 
     function getDemeritCount(address userAddress) view public returns (address, uint) {
         return (userAddress, demerits[userAddress].length);
+    }
+
+    event DemeritBalanceChange(address addr, uint newBalance);
+
+    event BuyDemerits(address addr, uint buyAmount);
+
+    function buyDemerits(uint amount) public payable {
+        require(msg.value == getDemeritPrice(amount)); // ensure value sent is correct
+
+        users[msg.sender].demeritBalance += amount;
+
+        BuyDemerits(msg.sender, amount);
+        DemeritBalanceChange(msg.sender, users[msg.sender].demeritBalance);
+    }
+
+    function getDemeritPrice(uint amount) public pure returns (uint) {
+        //@todo: would be nice if this value floated somehow
+
+        return amount * 1000000000000000; // 0.001 ether
+    }
+
+    function _getDemeritPayoutValue(uint value) internal pure returns (uint) {
+        return (value * 95) / 100; // 95%
     }
 }
