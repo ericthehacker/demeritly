@@ -53,13 +53,22 @@ App = {
 				that.initUi();
 				that.bindEvents();
 			}).catch(function(err) {
-				console.log(err.message);
+				console.log(err);
 			});
 		});
 	},
 
 	getAccount: function() {
-		return window.location.hash.substr(1);
+		if(this.accounts.length > 1) {
+			// more than one address -- user must choose and it will be on hash
+			return window.location.hash.substr(1);
+		} else if(this.accounts.length == 1) {
+			// exactly one address -- just use it
+			return this.accounts[0];
+		} else {
+			// no accounts to work with
+			return '';
+		}
 	},
 
 	callMethod(methodName, args, value) {

@@ -18,7 +18,7 @@
     <![endif]-->
   </head>
   <body>
-    <div id="account-switcher-app" class="account-switcher-wrapper" v-cloak>
+    <div id="account-switcher-app" class="account-switcher-wrapper" v-cloak v-if="accounts.length > 1">
         <label for="account-switcher">Ethereum Account</label>
         <select id="account-switcher">
             <option v-bind:value="account" v-for="(account, key) in accounts" v-bind:selected="account == selectedAccount ? 'selected' : ''">
@@ -95,7 +95,7 @@
                 </select>
 
                 <label for="demerit-amount">Amount</label>
-                <input type="number" id="demerit-amount" />
+                <input type="number" min="1" max="256" step="1" id="demerit-amount" />
 
                 <label for="demerit-message">Message</label>
                 <textarea id="demerit-message"></textarea>
@@ -165,7 +165,6 @@
     </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/web3.min.js"></script>
     <script src="js/truffle-contract.js"></script>
     <script src="js/spark-md5.min.js"></script>
