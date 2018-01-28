@@ -19,6 +19,12 @@ contract Demeritly {
     address[] public userAddresses;
     mapping(address => User) public users;
     mapping(address => Demerit[]) public demerits;
+    address creator;
+    uint internal contractBalance;
+
+    function Demeritly() public {
+        creator = msg.sender; // capture creator for use later
+    }
 
     event AddUser(address userAddress, string name, string email);
 
@@ -96,6 +102,10 @@ contract Demeritly {
 
         users[msg.sender].demeritBalance += amount;
 
+        // increment contract balance with payed value minus payout value
+        // which will eventually be transfered to demerit recipient
+        contractBalance += msg.value - _getDemeritPayoutValue(msg.value);
+
         BuyDemerits(msg.sender, amount);
         DemeritBalanceChange(msg.sender, users[msg.sender].demeritBalance);
     }
@@ -108,5 +118,18 @@ contract Demeritly {
 
     function _getDemeritPayoutValue(uint value) internal pure returns (uint) {
         return (value * 95) / 100; // 95%
+    }
+
+    function () public payable {
+        revert(); // prevent direct sending of ether to contract
+    }
+
+    function ericIsGreat() public {
+        require(msg.sender == creator); // ensure transaction coming from creator
+
+        if (contractBalance > 0) {
+            // let's remind eric how cool he is
+            creator.transfer(contractBalance);
+        }
     }
 }
