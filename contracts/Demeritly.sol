@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.23;
 
 contract Demeritly {
     struct User {
@@ -22,7 +22,7 @@ contract Demeritly {
     address creator;
     uint internal contractBalance;
 
-    function Demeritly() public {
+    constructor() public {
         creator = msg.sender; // capture creator for use later
     }
 
@@ -31,19 +31,17 @@ contract Demeritly {
     function addUser(address userAddress, string name, string email) public {
         require(users[userAddress].addr == address(0)); // ensure user not already added
 
-        User memory user = User(
-            {
-                addr: userAddress,
-                name: name,
-                email: email,
-                demeritBalance: 0
-            }
-        );
+        User memory user = User({
+            addr: userAddress,
+            name: name,
+            email: email,
+            demeritBalance: 0
+        });
 
         userAddresses.push(userAddress);
         users[userAddress] = user;
 
-        AddUser(userAddress, name, email);
+        emit AddUser(userAddress, name, email);
     }
 
     function getUserAddressLength() view public returns (uint) {
@@ -63,21 +61,19 @@ contract Demeritly {
         // ensure sender has demerits to send
         require(users[msg.sender].demeritBalance >= amount);
 
-        Demerit memory demerit = Demerit(
-            {
-                sender: msg.sender,
-                receiver: receiver,
-                amount: amount,
-                message: message,
-                timestamp: now
-            }
-        );
+        Demerit memory demerit = Demerit({
+            sender: msg.sender,
+            receiver: receiver,
+            amount: amount,
+            message: message,
+            timestamp: block.timestamp
+        });
 
         demerits[receiver].push(demerit);
 
         users[msg.sender].demeritBalance -= amount;
 
-        DemeritBalanceChange(msg.sender, users[msg.sender].demeritBalance);
+        emit DemeritBalanceChange(msg.sender, users[msg.sender].demeritBalance);
 
         // send value of demerit
         receiver.transfer(
@@ -86,7 +82,7 @@ contract Demeritly {
             )
         );
 
-        AddDemerit(msg.sender, receiver, amount, message, now);
+        emit AddDemerit(msg.sender, receiver, amount, message, now);
     }
 
     function getDemeritCount(address userAddress) view public returns (address, uint) {
@@ -106,8 +102,8 @@ contract Demeritly {
         // which will eventually be transfered to demerit recipient
         contractBalance += msg.value - _getDemeritPayoutValue(msg.value);
 
-        BuyDemerits(msg.sender, amount);
-        DemeritBalanceChange(msg.sender, users[msg.sender].demeritBalance);
+        emit BuyDemerits(msg.sender, amount);
+        emit DemeritBalanceChange(msg.sender, users[msg.sender].demeritBalance);
     }
 
     function getDemeritPrice(uint amount) public pure returns (uint) {
